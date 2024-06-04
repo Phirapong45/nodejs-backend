@@ -5,7 +5,7 @@ const path = require("path");
 const Wallet = require("../models/wallet");
 
 //Service
-exports.checkPhoneNumber = async (req, res) => {
+exports.balance = async (req, res) => {
     const phoneNumber = req.query.phoneNumber;
     try {
         const wallet = await Wallet.findOne({ phoneNumber: phoneNumber });
@@ -22,9 +22,9 @@ exports.checkPhoneNumber = async (req, res) => {
             });
         }
     } catch (err) {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
-        return res.status(err.statusCode).json({ message: err.message });
+        // const error = new Error('Server Error');
+        // error.statusCode = 500;
+        // throw error;
+        next(err);
     }
 };

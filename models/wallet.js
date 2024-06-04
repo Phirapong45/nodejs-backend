@@ -7,6 +7,7 @@ const walletSchema = new Schema({
     phoneNumber: {
         type: String,
         required: true
+        // unique: true //เงื่อนไขให้ unique //ดูใน mongodb compass มันเป็น unique 
     },
     totalBalance: {
         type: Number,
