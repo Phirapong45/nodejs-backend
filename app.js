@@ -22,20 +22,20 @@ app.use(cors(corsOptions));
 // path
 app.use("/balance", balanceRoutes);
 
+//middleware ที่จัดการ error
+app.use((error, req, res, next) => {
+    const status = error.statusCode || 500;
+    const message = error.message;
+    res.status(status).json({ message: message });
+});
+
 //connect MongoDB
 mongoose
     .connect(
-        ""
+        "mongodb+srv://phirapongintern:...@cluster0.op88gju.mongodb.net/wallet_db?retryWrites=true&w=majority&appName=Cluster0"
     )
     .then((result) => {
         //console.log("Connected to MongoDB"); เช็คว่าต่อ database หรือยัง
         app.listen(8080);
     })
     .catch((err) => console.log(err));
-
-
-//middleware ที่จัดการ error
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Server Error');
-});

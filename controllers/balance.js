@@ -22,9 +22,8 @@ exports.balance = async (req, res) => {
             });
         }
     } catch (err) {
-        // const error = new Error('Server Error');
-        // error.statusCode = 500;
-        // throw error;
+        const error = new Error('Server Error');
+        error.statusCode = 500;
         next(err);
     }
 };
