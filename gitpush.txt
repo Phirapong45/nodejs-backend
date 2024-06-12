@@ -1,5 +1,0 @@
-# ปิด password ไม่ต้องแล้ว ใช้ environment variables
-# git status
-# git add .
-# git commit
-# git push
