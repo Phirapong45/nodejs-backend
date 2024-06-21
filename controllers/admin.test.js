@@ -14,7 +14,7 @@ describe('admin top up', () => {
     });
 
     it('should return 404 when phone number not found', async () => {
-        const req = { body: { phoneNumber: '1234567890', topupAmount: 500 } }; // mock ข้อมูลผู้ใช้
+        const req = { body: { phoneNumber: '1234567890', topupAmount: 500 } }; // ส่ง mock body ผู้ใช้
         const res = {
             status: jest.fn().mockReturnThis(),
             json: jest.fn(),
@@ -101,7 +101,23 @@ describe('admin top up', () => {
         Wallet.findOne.mockResolvedValueOnce({ totalBalance: 500 });
         await admin(req, res);
 
+        //ผลที่คาดหวัง
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({ message: 'Value must be between 100 and 1000.' });
+    });
+
+    it('should return 500 server error', async () => {
+        const req = { body: { phoneNumber: '1234567890', topupAmount: 500 } };
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+        };
+        Wallet.findOne.mockImplementationOnce(new Error('Database connection failed')); // Mock Wallet.findOne to throw an error
+        const next = jest.fn(); // Mock next function
+
+        await admin(req, res, next);
+
+        //ผลที่คาดหวัง
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({ message: 'Server Error', statusCode: 500 }));
     });
 });

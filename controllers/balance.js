@@ -5,8 +5,13 @@ const path = require("path");
 const Wallet = require("../models/wallet");
 
 //Service
-exports.balance = async (req, res) => {
+exports.balance = async (req, res, next) => {
     const phoneNumber = req.query.phoneNumber;
+
+    if (!/^\d+$/.test(phoneNumber)) {  // ตรวจสอบว่าหมายเลขโทรศัพท์มีเฉพาะตัวเลข
+        return res.status(400).json({ message: "Invalid phone number format." });
+    }
+
     try {
         const wallet = await Wallet.findOne({ phoneNumber: phoneNumber });
         if (wallet) {
@@ -24,6 +29,6 @@ exports.balance = async (req, res) => {
     } catch (err) {
         const error = new Error('Server Error');
         error.statusCode = 500;
-        next(err);
+        next(error);
     }
 };

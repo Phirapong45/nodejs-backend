@@ -28,7 +28,9 @@ exports.admin = async (req, res, next) => {
             totalBalance: wallet.totalBalance
         });
     } catch (err) {
-        err.statusCode = 500;
-        next(err);
+        console.error(err);
+        const error = new Error('Server Error');
+        error.statusCode = 500;
+        next(error); // นำ error ไปส่งให้ middleware รับ error
     }
 };
