@@ -1,123 +1,70 @@
-// Import
-const { admin } = require('../controllers/admin'); // import function ที่จะทดสอบ
-const Wallet = require('../models/wallet');
+// import
+const { admin } = require("../controllers/admin");
+const adminService = require("../services/admin");
 
-// mock database
-jest.mock('../models/wallet', () => ({
-    findOne: jest.fn(),
-}));
+// mock services
+jest.mock("../services/admin");
 
 // test
-describe('admin top up', () => {
+describe("check traffic", () => {
+    let req, res, next;
+
     beforeEach(() => {
-        jest.clearAllMocks(); // reset mock function ทุกครั้งก่อน test
-    });
-
-    it('should return 404 when phone number not found', async () => {
-        const req = { body: { phoneNumber: '1234567890', topupAmount: 500 } }; // ส่ง mock body ผู้ใช้
-        const res = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn(),
+        req = {
+            body: {
+                phoneNumber: '1234567890',
+                topupAmount: '500'
+            }
         };
-        Wallet.findOne.mockResolvedValueOnce(null); // mock ไม่พบเบอร์โทร
-        await admin(req, res);
-
-        // ผลที่คาดหวัง
-        expect(Wallet.findOne).toHaveBeenCalledWith({ phoneNumber: '1234567890' });
-        expect(res.status).toHaveBeenCalledWith(404);
-        expect(res.json).toHaveBeenCalledWith({ message: 'Phone number not found.' });
-    });
-
-    it('should return 400 when topup amount is < 100', async () => {
-        const req = { body: { phoneNumber: '1234567890', topupAmount: 99 } };
-        const res = {
+        res = {
             status: jest.fn().mockReturnThis(),
-            json: jest.fn(),
+            json: jest.fn().mockReturnThis()
         };
-        Wallet.findOne.mockResolvedValueOnce({ phoneNumber: '1234567890', totalBalance: 500 });
-        await admin(req, res);
-
-        // ผลที่คาดหวัง
-        expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({ message: 'Value must be between 100 and 1000.' });
+        next = jest.fn();
     });
 
-    it('should return 200 when topup amount is equal 100', async () => {
-        const req = { body: { phoneNumber: '1234567890', topupAmount: 100 } };
-        const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-        Wallet.findOne.mockResolvedValueOnce({ phoneNumber: '1234567890', totalBalance: 500, save: jest.fn().mockResolvedValueOnce() });
-        await admin(req, res);
-
-        //ผลที่คาดหวัง
-        expect(res.status).toHaveBeenCalledWith(200)
-        expect(res.json).toHaveBeenCalledWith({
-            message: 'Phone number exists.',
-            phoneNumber: '1234567890',
-            totalBalance: 600
-        })
-    });
-
-    it('should return 200 when topup amount is equal 500', async () => {
-        const req = { body: { phoneNumber: '1234567890', topupAmount: 500 } };
-        const res = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn(),
-        };
-        Wallet.findOne.mockResolvedValueOnce({
-            phoneNumber: '1234567890', totalBalance: 500, save: jest.fn().mockResolvedValueOnce(),
-        });
-        await admin(req, res);
-
-        //ผลที่คาดหวัง
-        expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith({
-            message: 'Phone number exists.',
-            phoneNumber: '1234567890',
-            totalBalance: 1000
-        });
-    });
-
-    it('should return 200 when topup amount is equal 1000', async () => {
-        const req = { body: { phoneNumber: '1234567890', topupAmount: 1000 } };
-        const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-        Wallet.findOne.mockResolvedValueOnce({
-            totalBalance: 500,
-            save: jest.fn().mockResolvedValueOnce(),
-        });
-        await admin(req, res);
-
-        //ผลที่คาดหวัง
-        expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith({
-            message: 'Phone number exists.',
-            phoneNumber: '1234567890',
-            totalBalance: 1500,
-        });
-    });
-
-    it('should return 400 when topup amount is > 1000', async () => {
-        const req = { body: { phoneNumber: '1234567890', topupAmount: 1001 } };
-        const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-        Wallet.findOne.mockResolvedValueOnce({ totalBalance: 500 });
-        await admin(req, res);
-
-        //ผลที่คาดหวัง
-        expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({ message: 'Value must be between 100 and 1000.' });
-    });
-
-    it('should return 500 server error', async () => {
-        const req = { body: { phoneNumber: '1234567890', topupAmount: 500 } };
-        const res = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn(),
-        };
-        Wallet.findOne.mockImplementationOnce(new Error('Database connection failed')); // Mock Wallet.findOne to throw an error
-        const next = jest.fn(); // Mock next function
+    it('should return 200 and phone number exists', async () => {
+        adminService.adminTopup.mockResolvedValue({ totalBalance: 1500 });
 
         await admin(req, res, next);
 
         //ผลที่คาดหวัง
-        expect(next).toHaveBeenCalledWith(expect.objectContaining({ message: 'Server Error', statusCode: 500 }));
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith({
+            message: "Phone number exists.",
+            phoneNumber: req.body.phoneNumber,
+            totalBalance: 1500
+        });
+    });
+
+    it('should return 400 if 1000<value<100', async () => {
+        adminService.adminTopup.mockRejectedValue(new Error('Value must be between 100 and 1000.'));
+
+        await admin(req, res, next);
+
+        //ผลที่คาดหวัง
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: 'Value must be between 100 and 1000.' });
+    });
+
+    it('should return 404 if phone number not found', async () => {
+        adminService.adminTopup.mockRejectedValue(new Error('Phone number not found.'));
+
+        await admin(req, res, next);
+        //ผลที่คาดหวัง
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.json).toHaveBeenCalledWith({ message: 'Phone number not found.' });
+    });
+
+    it('should return 500 server error', async () => {
+        adminService.adminTopup.mockRejectedValue(new Error('server error'));
+
+        await admin(req, res, next);
+
+        //ผลที่คาดหวัง
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({
+            message: 'Server Error',
+            statusCode: 500
+        }));
     });
 });

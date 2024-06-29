@@ -1,108 +1,75 @@
-// Import
-const { balance } = require('../controllers/balance');
-const Wallet = require('../models/wallet');
+// import
+const { balance } = require("../controllers/balance");
+const balanceService = require("../services/balance");
 
-// mock database 
-jest.mock('../models/wallet');
-
-const mockWalletData = [
-    { phoneNumber: '1234567890', totalBalance: 1000 },
-    { phoneNumber: '0987654321', totalBalance: 500 }
-];
-
-// mock Wallet.findOne
-Wallet.findOne = jest.fn(({ phoneNumber }) => {
-    return Promise.resolve(mockWalletData.find(wallet => wallet.phoneNumber === phoneNumber) || null);
-});
+// mock services
+jest.mock("../services/balance");
 
 // test
-describe('check balance', () => {
-    it('return 404 when phone number not found', async () => {
-        const req = { query: { phoneNumber: '1111111111' } };
-        const res = {
+describe("check traffic", () => {
+    let req, res, next;
+
+    beforeEach(() => {
+        req = { query: { phoneNumber: "" } };
+        res = {
             status: jest.fn().mockReturnThis(),
             json: jest.fn()
         };
-        const next = jest.fn();
-
-        await balance(req, res, next);
-
-        // ผลที่คาดหวัง
-        expect(res.status).toHaveBeenCalledWith(404);
-        expect(res.json).toHaveBeenCalledWith({
-            message: "Phone number not found."
-        });
+        next = jest.fn();
     });
 
-    it('return 200 when phone number exists', async () => {
-        const req = { query: { phoneNumber: '1234567890' } };
-        const res = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn()
-        };
-        const next = jest.fn();
-
-        await balance(req, res, next);
-
-        // ผลที่คาดหวัง
-        expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith({
-            message: "Phone number exists.",
-            phoneNumber: '1234567890',
-            totalBalance: 1000
+    it("should return 400 if phone number format is invalid", async () => {
+        req.query.phoneNumber = "invalidPhoneNumber";
+        balanceService.getBalance.mockImplementation(() => {
+            throw new Error("Invalid phone number format.");
         });
-    });
-
-    it('return 200 when phone number exists 1', async () => {
-        const req = { query: { phoneNumber: '0987654321' } };
-        const res = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn()
-        };
-        const next = jest.fn();
 
         await balance(req, res, next);
 
-        // ผลที่คาดหวัง
-        expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith({
-            message: "Phone number exists.",
-            phoneNumber: '0987654321',
-            totalBalance: 500
-        });
-    });
-
-    it('return 400 when phone number have any character', async () => {
-        const req = { query: { phoneNumber: '12345abcde' } };
-        const res = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn()
-        };
-        const next = jest.fn();
-
-        await balance(req, res, next);
-
-        // ผลที่คาดหวัง
+        //ผลที่คาดหวัง
         expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({
-            message: "Invalid phone number format."
-        });
+        expect(res.json).toHaveBeenCalledWith({ message: "Invalid phone number format." });
     });
 
-    it('return 500 when server error', async () => {
-        const req = { query: { phoneNumber: '1234567890' } };
-        const res = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn()
-        };
-        const next = jest.fn();
-
-        // mock ให้เกิดข้อผิดพลาด
-        Wallet.findOne.mockImplementationOnce(() => { throw new Error("Database connection failed"); });
+    it("should return 404 if phone number is not found", async () => {
+        req.query.phoneNumber = "1234567890";
+        balanceService.getBalance.mockImplementation(() => {
+            throw new Error("Phone number not found.");
+        });
 
         await balance(req, res, next);
 
-        // ผลที่คาดหวัง
-        expect(next).toHaveBeenCalledWith(expect.objectContaining({ message: 'Server Error', statusCode: 500 }));
+        //ผลที่คาดหวัง
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.json).toHaveBeenCalledWith({ message: "Phone number not found." });
+    });
+
+    it("should return 200 when phone number is found", async () => {
+        req.query.phoneNumber = "1234567890";
+        const mockBalance = 1000;
+        balanceService.getBalance.mockResolvedValue(mockBalance);
+
+        await balance(req, res, next);
+
+        //ผลที่คาดหวัง
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith({
+            message: "Phone number exists.",
+            phoneNumber: "1234567890",
+            totalBalance: mockBalance
+        });
+    });
+
+    it("should return 500 server error", async () => {
+        req.query.phoneNumber = "1234567890";
+        balanceService.getBalance.mockImplementation(() => { throw new Error("Server error"); });
+
+        await balance(req, res, next);
+
+        //ผลที่คาดหวัง
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({
+            message: "Server Error",
+            statusCode: 500
+        }));
     });
 });
