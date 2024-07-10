@@ -1,5 +1,5 @@
 // import
-const { balance } = require("../controllers/balance");
+const { balance } = require("./balance");
 const balanceService = require("../services/balance");
 
 // mock services

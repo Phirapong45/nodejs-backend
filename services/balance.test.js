@@ -1,5 +1,5 @@
 // import
-const { getBalance } = require("../services/balance");
+const { getBalance } = require("./balance");
 const Wallet = require("../models/wallet");
 
 // mock database
