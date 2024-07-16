@@ -22,6 +22,7 @@ const frontendLink = process.env.FR_LINK;
 const balanceRoutes = require("./routes/balance");
 const adminRoutes = require("./routes/admin");
 const healthRoutes = require("./routes/health");
+const qrcodeRoutes = require("./routes/qrcode");
 
 //สร้างแอปพลิเคชัน Express และใช้ bodyParser เพื่อแปลงข้อมูล JSON จากคำขอ
 const app = express();
@@ -29,7 +30,8 @@ app.use(bodyParser.json());
 
 //ตั้งค่า CORS
 const corsOptions = {
-    origin: frontendLink,
+    // origin: frontendLink,
+    origin: 'http://localhost:3000',
     credentials: true
 };
 app.use(cors(corsOptions));
@@ -37,7 +39,8 @@ app.use(cors(corsOptions));
 //path
 app.use("/balance", balanceRoutes);
 app.use("/admin", adminRoutes);
-app.use("/health", healthRoutes)
+app.use("/health", healthRoutes);
+app.use("/qrcode", qrcodeRoutes);
 
 //Middleware ที่จัดการ error
 app.use((error, req, res, next) => {
