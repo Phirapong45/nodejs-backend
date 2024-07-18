@@ -16,17 +16,16 @@ module.exports = {
 
         // ดึง slip verify โดยใช้ transactionId และ sendingBankCode
         try {
-            const accessTokenData = await qrcode.getToken(); // Get access token from qrcode.js
-            const accessToken = accessTokenData.accessToken;
-
+             // Get access token from qrcode.js
             const slipVerifyResponse = await axios.get(`https://api-sandbox.partners.scb/partners/sandbox/v1/payment/billpayment/transactions/${paymentData.transactionId}?sendingBank=${paymentData.sendingBankCode}`, {
                 headers: {
                     'accept-language': 'EN',
-                    'authorization': `Bearer ${accessToken}`,
+                    'authorization': `Bearer ${process.env.TOKEN}`,
                     'requestUID': 'your-request-uid',
                     'resourceOwnerID': 'l79edb0aa378044ea3804ba77c0acfc6aa'
                 }
             });
+            // console.log('link:', slipVerifyResponse);
 
             console.log('Slip Verify Response:', slipVerifyResponse.data);
 
