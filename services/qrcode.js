@@ -8,7 +8,7 @@ const getToken = async () => {
         'Content-Type': 'application/json',
         'Authorization': 'Basic bDc5ZWRiMGFhMzc4MDQ0ZWEzODA0YmE3N2MwYWNmYzZhYTozODBmM2E0MThhNTg0ZmE5OTcyMTI0YWM0YTNkZTRjYw==',
         'requestUId': 'your-request-uid',
-        'resourceOwnerId': 'your-resource-owner-id'
+        'resourceOwnerId': 'l79edb0aa378044ea3804ba77c0acfc6aa'
     };
     const data = {
         applicationKey: 'l79edb0aa378044ea3804ba77c0acfc6aa',
@@ -17,6 +17,7 @@ const getToken = async () => {
 
     try {
         const response = await axios.post(url, data, { headers });
+        console.log('data:', response.data)
         return response.data;
     } catch (error) {
         console.error('Error getting token:', error.response ? error.response.data : error.message);
@@ -30,14 +31,14 @@ const createQRCode = async (accessToken, topupAmount) => {
         'Content-Type': 'application/json',
         'accept-language': 'EN',
         'authorization': `Bearer ${accessToken}`,
-        'requestUId': '1b01dff2-b3a3-4567-adde-cd9dd73c8b6d',
+        'requestUId': 'your-request-uid',
         'resourceOwnerId': 'l79edb0aa378044ea3804ba77c0acfc6aa'
     };
     const data = {
         qrType: 'PP',
         ppType: 'BILLERID',
         ppId: '068384100982686',
-        amount: topupAmount.toString(), // ใช้ topupAmount ที่รับเข้ามาในฟังก์ชันและแปลงเป็น string
+        amount: topupAmount.toString(),
         ref1: 'REFERENCE1',
         ref2: 'REFERENCE2',
         ref3: 'SCB'
@@ -69,11 +70,10 @@ exports.qrcodeTopup = async (phoneNumber, topupAmount) => {
         const accessToken = await getToken();
         const qrRawData = await createQRCode(accessToken.data.accessToken, topupAmount);
 
+        // Display the URL of the generated QR code
         const qrImageUrl = await QRCode.toDataURL(qrRawData);
-
-        console.log('QR Code URL:', qrImageUrl); // แสดง URL ของ QR code ที่ได้
-
-        return wallet;
+        console.log('QR Code URL:', qrImageUrl);
+        return qrImageUrl;
     } catch (error) {
         console.error('Error in qrcodeTopup function:', error.message);
         throw error;

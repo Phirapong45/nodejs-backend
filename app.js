@@ -23,6 +23,7 @@ const balanceRoutes = require("./routes/balance");
 const adminRoutes = require("./routes/admin");
 const healthRoutes = require("./routes/health");
 const qrcodeRoutes = require("./routes/qrcode");
+const confirmpayRoutes = require('./routes/confirmpay');
 
 //สร้างแอปพลิเคชัน Express และใช้ bodyParser เพื่อแปลงข้อมูล JSON จากคำขอ
 const app = express();
@@ -41,6 +42,7 @@ app.use("/balance", balanceRoutes);
 app.use("/admin", adminRoutes);
 app.use("/health", healthRoutes);
 app.use("/qrcode", qrcodeRoutes);
+app.use("/confirmpay", confirmpayRoutes);
 
 //Middleware ที่จัดการ error
 app.use((error, req, res, next) => {
@@ -57,6 +59,8 @@ mongoose
     .connect(mongoUri)
     .then((result) => {
         // เช็คว่าต่อ database หรือยัง
+        console.log('Connected to MongoDB');
+        // เปิด server ที่ port 8080
         app.listen(8080, () => {
             console.log("Server is running on port 8080");
         });

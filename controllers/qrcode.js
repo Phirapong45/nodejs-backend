@@ -11,9 +11,7 @@ exports.qrcode = async (req, res, next) => {
     try {
         const wallet = await qrcodeService.qrcodeTopup(phoneNumber, topupAmount);
         return res.status(200).json({
-            message: "Phone number exists.",
-            phoneNumber: phoneNumber,
-            totalBalance: wallet.totalBalance,
+            qrUrl: wallet
         });
     } catch (err) {
         console.error(err.message);
