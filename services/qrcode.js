@@ -69,6 +69,8 @@ exports.qrcodeTopup = async (phoneNumber, topupAmount) => {
 
         const accessToken = await getToken();
         process.env.TOKEN = accessToken.data.accessToken
+        process.env.PHONE = phoneNumber
+        process.env.AMOUNT = topupAmount
         const qrRawData = await createQRCode(accessToken.data.accessToken, topupAmount);
 
         // Display the URL of the generated QR code
