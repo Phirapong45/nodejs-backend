@@ -24,6 +24,7 @@ const adminRoutes = require("./routes/admin");
 const healthRoutes = require("./routes/health");
 const qrcodeRoutes = require("./routes/qrcode");
 const confirmpayRoutes = require('./routes/confirmpay');
+const addwalletRoutes = require('./routes/addwallet');
 
 //สร้างแอปพลิเคชัน Express และใช้ bodyParser เพื่อแปลงข้อมูล JSON จากคำขอ
 const app = express();
@@ -43,6 +44,7 @@ app.use("/admin", adminRoutes);
 app.use("/health", healthRoutes);
 app.use("/qrcode", qrcodeRoutes);
 app.use("/confirmpay", confirmpayRoutes);
+app.use("/addwallet", addwalletRoutes);
 
 //Middleware ที่จัดการ error
 app.use((error, req, res, next) => {

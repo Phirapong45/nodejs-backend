@@ -14,17 +14,6 @@ exports.qrcode = async (req, res, next) => {
             qrUrl: wallet
         });
     } catch (err) {
-        console.error(err.message);
-        if (
-            err.message === "Value must be between 100 and 1000."
-        ) {
-            return res.status(400).json({ message: err.message });
-        } else if (err.message === "Phone number not found.") {
-            return res.status(404).json({ message: err.message });
-        } else {
-            const error = new Error("Server Error");
-            error.statusCode = 500;
-            next(error);
-        }
+        handleError(err, res, next);
     }
 };

@@ -3,54 +3,40 @@ const Wallet = require("../models/wallet");
 
 module.exports = {
     confirmpay: async (paymentData) => {
-        // ประมวลผลข้อมูลที่ได้รับ เช่น บันทึกลงฐานข้อมูล
-        console.log('Received Payment Confirmation:', paymentData);
+        // ดูที่ SCB ส่งมา
+        console.log('Received Payment Confirmation from SCB:', paymentData);
 
         // ส่งการตอบกลับไปยัง SCB
-        const response = {
-            resCode: "00",
-            resDesc: "success",
-            transactionId: paymentData.transactionId,
-            confirmId: "Optional"
-        };
-
-        // ดึง slip verify โดยใช้ transactionId และ sendingBankCode
         try {
-            // Get access token from qrcode.js
-            const slipVerifyResponse = await axios.get(`https://api-sandbox.partners.scb/partners/sandbox/v1/payment/billpayment/transactions/${paymentData.transactionId}?sendingBank=${paymentData.sendingBankCode}`, {
-                headers: {
-                    'accept-language': 'EN',
-                    'authorization': `Bearer ${process.env.TOKEN}`,
-                    'requestUID': 'your-request-uid',
-                    'resourceOwnerID': 'l79edb0aa378044ea3804ba77c0acfc6aa'
-                }
-            });
+            const response = {
+                resCode: "00",
+                resDesc: "success",
+                transactionId: paymentData.transactionId,
+                confirmId: "Optional"
+            };
+            console.log('Merchant response to SCB', response);
 
-            console.log('Slip Verify Response:', slipVerifyResponse.data);
-            // console.log('amount:', process.env.AMOUNT);
+            // ดึงค่า billPaymentRef1 สำหรับการเพิ่มเงินใน wallet
+            const phoneNumber = paymentData.billPaymentRef1;
+            const topupAmount = parseInt(paymentData.amount);
 
-            // นำข้อมูลจาก slip verify มาใส่ใน response
-            response.slipVerify = slipVerifyResponse.data;
-
-            const phoneNumber = process.env.PHONE
-            const topupAmount = parseInt(process.env.AMOUNT);
-
+            // ค้นหา wallet ตามหมายเลขโทรศัพท์
             const wallet = await Wallet.findOne({ phoneNumber: phoneNumber });
-            wallet.totalBalance += topupAmount;  //เพิ่มเงินเข้าไปใน wallet
+            if (!wallet) {
+                throw new Error('Wallet not found');
+            }
+
+            // เพิ่มยอดเงินเข้าไปใน wallet
+            wallet.totalBalance += topupAmount;
             await wallet.save();
-            console.log('success', wallet)
-            return wallet;
+            console.log("Wallet updated successfully", wallet);
 
-        } catch(error) {
-        console.error('Error fetching slip verify:', error);
-        response.resCode = "99";
-        response.resDesc = "error";
+            // ส่งค่าตอบกลับหลังจากทำงานเสร็จ
+            return response;
+
+        } catch (error) {
+            console.error('Error Payment Confirmation:', error);
+            throw error;
+        }
     }
-
-        return {
-            status: 200,
-            message: 'Top up successful',
-            wallet: wallet
-        };
-}
 };

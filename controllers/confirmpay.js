@@ -1,3 +1,7 @@
+//import
+const path = require("path");
+
+//import service
 const confirmpayService = require("../services/confirmpay");
 
 exports.confirmpay = async (req, res) => {

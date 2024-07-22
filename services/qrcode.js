@@ -1,3 +1,4 @@
+//import
 const axios = require('axios');
 const QRCode = require('qrcode');
 const Wallet = require("../models/wallet");
@@ -17,7 +18,7 @@ const getToken = async () => {
 
     try {
         const response = await axios.post(url, data, { headers });
-        console.log('data:', response.data)
+        console.log('get access token data:', response.data)
         return response.data;
     } catch (error) {
         console.error('Error getting token:', error.response ? error.response.data : error.message);
@@ -25,7 +26,11 @@ const getToken = async () => {
     }
 };
 
-const createQRCode = async (accessToken, topupAmount) => {
+const hashPhoneNumber = (phoneNumber) => {
+    return crypto.createHash('sha256').update(phoneNumber).digest('hex');
+};
+
+const createQRCode = async (accessToken, topupAmount, phoneNumber) => {
     const url = 'https://api-sandbox.partners.scb/partners/sandbox/v1/payment/qrcode/create';
     const headers = {
         'Content-Type': 'application/json',
@@ -39,13 +44,14 @@ const createQRCode = async (accessToken, topupAmount) => {
         ppType: 'BILLERID',
         ppId: '068384100982686',
         amount: topupAmount.toString(),
-        ref1: 'REFERENCE1',
+        ref1: phoneNumber,
         ref2: 'REFERENCE2',
         ref3: 'SCB'
     };
 
     try {
         const response = await axios.post(url, data, { headers, timeout: 20000 });
+        // console.log("qr raw data:", response.data)
         const qrRawData = response.data.data.qrRawData;
         return qrRawData;
     } catch (error) {
@@ -68,15 +74,15 @@ exports.qrcodeTopup = async (phoneNumber, topupAmount) => {
         }
 
         const accessToken = await getToken();
-        process.env.TOKEN = accessToken.data.accessToken
-        process.env.PHONE = phoneNumber
-        process.env.AMOUNT = topupAmount
-        const qrRawData = await createQRCode(accessToken.data.accessToken, topupAmount);
+        const qrRawData = await createQRCode(accessToken.data.accessToken, topupAmount, phoneNumber);
 
         // Display the URL of the generated QR code
         const qrImageUrl = await QRCode.toDataURL(qrRawData);
         console.log('QR Code URL:', qrImageUrl);
-        return qrImageUrl;
+        return {
+            qrImageUrl,
+            phoneNumber
+        };
     } catch (error) {
         console.error('Error in qrcodeTopup function:', error.message);
         throw error;
