@@ -1,11 +1,11 @@
-// Import
+//Import
 const { adminTopup } = require('../services/admin');
 const Wallet = require('../models/wallet');
 
-// mock database
+//mock database
 jest.mock('../models/wallet');
 
-// test
+//test
 describe('adminTopup', () => {
     beforeEach(() => {
         jest.clearAllMocks();

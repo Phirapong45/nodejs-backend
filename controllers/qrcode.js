@@ -14,6 +14,6 @@ exports.qrcode = async (req, res, next) => {
             qrUrl: wallet
         });
     } catch (err) {
-        handleError(err, res, next);
+        next(err);
     }
 };

@@ -6,8 +6,7 @@ const Wallet = require("../models/wallet");
 jest.mock("../models/wallet");
 
 //test
-describe("walletService.getBalance", () => {
-
+describe("addwalletService by use .getBalance from balance", () => {
     it("phone number format is invalid", async () => {
         Wallet.findOne.mockResolvedValue("123456789A"); // mock ให้ findOne คืนค่า 
 

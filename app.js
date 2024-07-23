@@ -8,7 +8,7 @@ const http = require('http');
 const server = http.createServer();
 
 //ใช้ dotenv ทำ environment variables
-require("dotenv").config({ path: "secret.env" });
+require("dotenv").config({ path: ".env" });
 
 //import environment variables
 const dbUser = process.env.DB_USER;

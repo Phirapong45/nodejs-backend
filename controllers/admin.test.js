@@ -1,11 +1,11 @@
-// import
+//import
 const { admin } = require("../controllers/admin");
 const adminService = require("../services/admin");
 
-// mock services
+//mock services
 jest.mock("../services/admin");
 
-// test
+//test
 describe("check traffic", () => {
     let req, res, next;
 
