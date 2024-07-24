@@ -1,4 +1,4 @@
 node_modules
 gitpush.txt
 load-balancer.txt
-.env
+.env/
