@@ -61,6 +61,10 @@ exports.qrcodeTopup = async (phoneNumber, topupAmount) => {
             throw new Error("Phone number not found.");
         }
 
+        if (topupAmount < 100 || topupAmount > 1000) {  //ตรวจสอบว่ายอดเงินอยู่ในช่วง 100-1000
+            throw new Error("Value must be between 100 and 1000.");
+        }
+
         const accessToken = await getToken();
         const qrRawData = await createQRCode(accessToken.data.accessToken, topupAmount, phoneNumber);
 

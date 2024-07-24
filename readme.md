@@ -1,4 +1,4 @@
-make .env file and add values 
+make .env file and add values before use by follow pattern below
 
 #MongoDB
 DB_USER = ...
@@ -27,3 +27,9 @@ SCB_API_SECRET = ...
 
 #Merchant Profile found in SCB Developers
 Biller_ID = ...
+
+
+
+
+after that run
+npm run start
