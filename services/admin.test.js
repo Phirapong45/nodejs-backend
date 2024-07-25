@@ -19,6 +19,12 @@ describe('adminTopup', () => {
             .rejects.toThrow('Phone number not found.'); // adminTopup หาไม่เจอ และโยนข้อผิดพลาดที่มีข้อความว่า 'Phone number not found.
     });
 
+    it('phone number format is invalid', async () => {
+        // ผลที่คาดหวัง
+        await expect(adminTopup('01234abcd9', 500)) // เรียกฟังก์ชัน adminTopup 
+            .rejects.toThrow('Invalid phone number format.');
+    });
+
     it('topupAmount is < 100', async () => {
         Wallet.findOne.mockResolvedValue({ phoneNumber: '0123456789', totalBalance: 500 });
 

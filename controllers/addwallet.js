@@ -2,7 +2,7 @@
 const path = require("path");
 
 //import service
-const addwalletService = require("../services/addwallet");
+const balanceService = require("../services/balance");
 
 exports.addwallet = async (req, res, next) => {
     const phoneNumber = req.body.phoneNumber;
